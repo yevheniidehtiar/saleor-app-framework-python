@@ -7,9 +7,10 @@ authors = [ "Saleor Commerce <hello@saleor.io>" ]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0"
+pydantic = "^2"
 uvicorn = "^0"
 aiofiles = "^0"
-aiohttp = ">3.8"
+aiohttp = "^3.8"
 jwt = "^1"
 boto3 = {version = "^1.20.24", optional = true}
 Jinja2 = ">=2.11.2,<4.0.0"
@@ -116,5 +117,6 @@ depends =
     py39,
     py310
     py311
+    py312
 parallel_show_output = True
 """

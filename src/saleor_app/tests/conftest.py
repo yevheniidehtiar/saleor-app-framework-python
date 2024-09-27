@@ -3,20 +3,8 @@ from unittest.mock import AsyncMock, Mock, create_autospec
 import pytest
 
 from saleor_app.app import SaleorApp
-from saleor_app.schemas.handlers import SaleorEventType, SQSUrl
+from saleor_app.schemas.handlers import SaleorEventType
 from saleor_app.schemas.manifest import Extension, Manifest
-from saleor_app.schemas.utils import LazyPath, LazyUrl
-from saleor_app.settings import AWSSettings
-
-
-@pytest.fixture
-def aws_settings():
-    return AWSSettings(
-        account_id="",
-        access_key_id="",
-        secret_access_key="",
-        region="",
-    )
 
 
 @pytest.fixture
@@ -31,14 +19,13 @@ def manifest():
         support_url="http://172.17.0.1:5000/supportUrl",
         id="saleor-simple-sample",
         permissions=["MANAGE_PRODUCTS", "MANAGE_USERS"],
-        app_url=LazyUrl("configuration-form"),
         extensions=[
             Extension(
                 label="Custom Product Create",
                 mount="PRODUCT_OVERVIEW_CREATE",
                 target="POPUP",
                 permissions=["MANAGE_PRODUCTS"],
-                url=LazyPath("extension"),
+                url="/extension",
             )
         ],
     )
@@ -87,30 +74,7 @@ def saleor_app_with_webhooks(saleor_app, get_webhook_details, webhook_handler):
     saleor_app.webhook_router.http_event_route(SaleorEventType.PRODUCT_DELETED)(
         webhook_handler
     )
-    saleor_app.webhook_router.sqs_event_route(
-        SQSUrl(
-            None,
-            scheme="awssqs",
-            user="username",
-            password="password",
-            host="localstack",
-            port="4566",
-            path="/account_id/order_created",
-        ),
-        SaleorEventType.ORDER_CREATED,
-    )(webhook_handler)
-    saleor_app.webhook_router.sqs_event_route(
-        SQSUrl(
-            None,
-            scheme="awssqs",
-            user="username",
-            password="password",
-            host="localstack",
-            port="4566",
-            path="/account_id/order_updated",
-        ),
-        SaleorEventType.ORDER_UPDATED,
-    )(webhook_handler)
+
     return saleor_app
 
 

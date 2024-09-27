@@ -1,7 +1,7 @@
 import json
 from unittest.mock import AsyncMock
 
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 
 from saleor_app.deps import SALEOR_DOMAIN_HEADER
 from saleor_app.schemas.handlers import SaleorEventType
@@ -11,7 +11,9 @@ from saleor_app.schemas.manifest import Manifest
 async def test_manifest(saleor_app):
     base_url = "http://test_app.saleor.local"
 
-    async with AsyncClient(app=saleor_app, base_url=base_url) as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=saleor_app), base_url=base_url
+    ) as ac:
         response = await ac.get("configuration/manifest")
 
     manifest = saleor_app.manifest.dict(by_alias=True)
@@ -20,7 +22,7 @@ async def test_manifest(saleor_app):
     manifest["configurationUrl"] = None
     manifest["extensions"][0]["url"] = "/extension"
 
-    manifest = json.loads(json.dumps(Manifest(**manifest).dict(by_alias=True)))
+    manifest = json.loads(json.dumps(Manifest(**manifest).model_dump(by_alias=True)))
 
     assert response.status_code == 200
     assert response.json() == manifest
@@ -47,12 +49,6 @@ async def test_install(saleor_app_with_webhooks, get_webhook_details, monkeypatc
         auth_token="saleor-app-token",
         manifest=saleor_app_with_webhooks.manifest,
         events={
-            "awssqs://username:password@localstack:4566/account_id/order_created": [
-                (SaleorEventType.ORDER_CREATED, None),
-            ],
-            "awssqs://username:password@localstack:4566/account_id/order_updated": [
-                (SaleorEventType.ORDER_UPDATED, None),
-            ],
             "http://test_app.saleor.local/webhook": [
                 (SaleorEventType.PRODUCT_CREATED, None),
                 (SaleorEventType.PRODUCT_UPDATED, None),

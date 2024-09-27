@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseModel, Field
+from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 
 from saleor_app.schemas.utils import LazyPath, LazyUrl
 
@@ -38,9 +38,7 @@ class Extension(BaseModel):
     target: TargetType
     permissions: List[str]
     url: Union[AnyHttpUrl, LazyUrl, LazyPath]
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class Manifest(BaseModel):
@@ -57,10 +55,10 @@ class Manifest(BaseModel):
     configuration_url: Optional[Union[AnyHttpUrl, LazyUrl]] = Field(
         None, alias="configurationUrl"
     )
-    app_url: Union[AnyHttpUrl, LazyUrl] = Field(..., alias="appUrl")
+    app_url: Union[AnyHttpUrl, LazyUrl] = Field(
+        LazyUrl("configuration-form"), alias="appUrl"
+    )
     token_target_url: Union[AnyHttpUrl, LazyUrl] = Field(
         LazyUrl("app-install"), alias="tokenTargetUrl"
     )
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)

@@ -9,12 +9,7 @@ from saleor_app.deps import (
     verify_saleor_domain,
     verify_webhook_signature,
 )
-from saleor_app.schemas.handlers import (
-    SaleorEventType,
-    SQSHandler,
-    SQSUrl,
-    WebHookHandlerSignature,
-)
+from saleor_app.schemas.handlers import SaleorEventType, WebHookHandlerSignature
 from saleor_app.schemas.webhook import Webhook
 
 SALEOR_EVENT_HEADER = "x-saleor-event"
@@ -74,13 +69,5 @@ class WebhookRouter(APIRouter):
 
             if subscription_query:
                 self.http_routes_subscriptions[event_type] = subscription_query
-
-        return decorator
-
-    def sqs_event_route(self, target_url: SQSUrl, event_type: SaleorEventType):
-        def decorator(func):
-            self.sqs_routes[event_type] = SQSHandler(
-                target_url=str(target_url), handler=func
-            )
 
         return decorator
